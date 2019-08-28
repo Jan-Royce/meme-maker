@@ -1,6 +1,7 @@
 var canvas = document.getElementById('image');
 var ctx = canvas.getContext('2d');
 var img = new Image();
+var trckVal = 100; //temp
 
 document.querySelector('#fileSelect').addEventListener('change', function(){
   let reader = new FileReader();
@@ -16,28 +17,100 @@ document.querySelector('#fileSelect').addEventListener('change', function(){
 });
 
 document.querySelector('#negative').addEventListener('click', function(){
-  for(j = 0; j < canvas.height; j++){
-    for(i = 0; i < canvas.width; i++){
-      let pixel = ctx.getImageData(i, j, 1, 1);
-      let newPixel = ctx.createImageData(1, 1);
-      newPixel.data[0] = 255 - pixel.data[0];
-      newPixel.data[1] = 255 - pixel.data[1];
-      newPixel.data[2] = 255 - pixel.data[2];
-      newPixel.data[3] = 255;
-      ctx.putImageData(newPixel, i, j);
-      console.log(i,j);
-    }
+  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
+  var dataArr = imageData.data;
+  for(i=0;i<dataArr.length;i+=4){
+    var r = dataArr[i];
+    var g = dataArr[i+1];
+    var b = dataArr[i+2];
+    var a = dataArr[i+3];
+
+    var newR = 255 - r;
+    var newG = 255 - g;
+    var newB = 255 - b;
+
+    dataArr[i] = clampRange(newR);
+    dataArr[i+1] = clampRange(newG);
+    dataArr[i+2] = clampRange(newB);
   }
+  ctx.putImageData(imageData, img.x, img.y);
 });
 
-function downloadImage()
-{
+document.querySelector('#contrast').addEventListener('click', function(){
+  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
+  var dataArr = imageData.data;
+  const contrastLine = 128;
+  for(i=0;i<dataArr.length;i+=4){
+    var r = dataArr[i];
+    var g = dataArr[i+1];
+    var b = dataArr[i+2];
+    var a = dataArr[i+3];
+
+    var newR = r >= contrastLine ? (r + trckVal / 5) : (r - trckVal / 5);
+    var newG = g >= contrastLine ? (g + trckVal / 5) : (g - trckVal / 5);
+    var newB = b >= contrastLine ? (b + trckVal / 5) : (b - trckVal / 5);
+
+    dataArr[i] = clampRange(newR);
+    dataArr[i+1] = clampRange(newG);
+    dataArr[i+2] = clampRange(newB);
+  }
+  ctx.putImageData(imageData, img.x, img.y);
+});
+
+document.querySelector('#bnw').addEventListener('click', function(){
+  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
+  var dataArr = imageData.data;
+  for(i=0;i<dataArr.length;i+=4){
+    var avg = 0;
+    var r = dataArr[i];
+    var g = dataArr[i+1];
+    var b = dataArr[i+2];
+    var a = dataArr[i+3];
+
+    avg = (r+g+b)/3;
+    var newR = r + (avg - r) * (trckVal / 100);
+    var newG = g + (avg - g) * (trckVal / 100);
+    var newB = b + (avg - b) * (trckVal / 100);
+
+    dataArr[i] = clampRange(newR);
+    dataArr[i+1] = clampRange(newG);
+    dataArr[i+2] = clampRange(newB);
+  }
+  ctx.putImageData(imageData, img.x, img.y);
+});
+
+document.querySelector('#noise').addEventListener('click', function(){
+  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
+  var dataArr = imageData.data;
+  var trckVal_rand = Math.floor(Math.random() * 100);//temp;
+  for(i=0;i<dataArr.length;i+=4){
+    var r = dataArr[i];
+    var g = dataArr[i+1];
+    var b = dataArr[i+2];
+    var a = dataArr[i+3];
+
+    var newR = r + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
+    var newG = g + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
+    var newB = b + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
+
+    dataArr[i] = clampRange(newR);
+    dataArr[i+1] = clampRange(newG);
+    dataArr[i+2] = clampRange(newB);
+  }
+  ctx.putImageData(imageData, img.x, img.y);
+});
+
+document.querySelector("#download").addEventListener("click", function(){
+downloadImage();});
+
+function downloadImage(){
   let dataURL = canvas.toDataURL();
   let fullQuality = canvas.toDataURL('image/jpeg', 1.0);
   let mediumQuality = canvas.toDataURL('image/jpeg', 0.5);
   let lowQuality = canvas.toDataURL('image/jpeg', 0.1);
 
-  image_name = "test";
+  image_name = Date.now();
+  // image_name = "test";
   let x = new XMLHttpRequest();
   x.open("GET", fullQuality, true);
   x.responseType = 'blob';
@@ -45,5 +118,12 @@ function downloadImage()
   x.send();
 }
 
-document.querySelector("#download").addEventListener("click", function(){
-downloadImage();});
+function getRandomIntInclusive(min, max) { //tnx mdn
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+}
+
+function clampRange(number){
+  return Math.min(Math.max(parseInt(number), 0), 255);
+}
