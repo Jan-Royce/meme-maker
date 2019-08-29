@@ -1,103 +1,100 @@
 var canvas = document.getElementById('image');
 var ctx = canvas.getContext('2d');
 var img = new Image();
-var trckVal = 100; //temp
+var trckVal = 50;
+var tintTrckVal = 50;
+var tintVal = 0;
+var imageDataArray = [];
 
 document.querySelector('#fileSelect').addEventListener('change', function(){
-  let reader = new FileReader();
-  reader.onload = function(){
-      img.onload = function(){
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-      };
-      img.src = reader.result;
-  };
-  reader.readAsDataURL(this.files[0]);
+  if(this.files.length > 0){
+    let reader = new FileReader();
+    reader.onload = function(){
+        img.onload = function(){
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0, img.width, img.height);
+          let imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
+          imageDataArray.push(imageData);
+        };
+        img.src = reader.result;
+    };
+    reader.readAsDataURL(this.files[0]);
+
+    document.querySelectorAll('.rbtn').forEach(function(el,i){
+      el.disabled = false;
+    });
+    document.querySelector('#download').disabled = false;
+    document.querySelector('#apply').disabled = false;
+    document.querySelector('#undo').disabled = false;
+    document.querySelector('#revert').disabled = false;
+    document.querySelector('#slider').disabled = false;
+  }
+  else{
+    document.querySelectorAll('.rbtn').forEach(function(el,i){
+      el.disabled = true;
+    });
+    document.querySelector('#download').disabled = true;
+    document.querySelector('#apply').disabled = true;
+    document.querySelector('#undo').disabled = true;
+    document.querySelector('#revert').disabled = true;
+    document.querySelector('#slider').disabled = true;
+  }
 });
 
-document.querySelector('#negative').addEventListener('click', function(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  for(i=0;i<dataArr.length;i+=4){
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
-    var a = dataArr[i+3];
-
-    var newR = 255 - r;
-    var newG = 255 - g;
-    var newB = 255 - b;
-
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
-  }
-  ctx.putImageData(imageData, img.x, img.y);
+document.querySelectorAll('.rbtn').forEach(function(el,i){
+  el.addEventListener('change',function(){
+    if(this.value == "tint"){
+      $('#tintSliderVal').val(0);
+      $('#tintSlider').val(50);
+      $('#tintSliderDiv').css('display','block');
+      $('#sliderDiv').css('display','none');
+    }
+    else{
+      $('#sliderVal').val(50);
+      $('#slider').val(50);
+      $('#sliderDiv').css('display','block');
+      $('#tintSliderDiv').css('display','none');
+    }
+  });
+});
+document.querySelector('#slider').addEventListener('input', function(){
+  trckVal = parseInt(this.value);
+  $('#sliderVal').val(trckVal);
+});
+document.querySelector('#tintSlider').addEventListener('input', function(){
+  tintTrckVal  = parseInt(this.value);
+  tintVal = tintTrckVal < 51 ? 50 - tintTrckVal :
+                tintTrckVal > 51 ? tintTrckVal - 51 : 0;
+  $('#tintSliderVal').val(tintVal);
 });
 
-document.querySelector('#contrast').addEventListener('click', function(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  const contrastLine = 128;
-  for(i=0;i<dataArr.length;i+=4){
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
-    var a = dataArr[i+3];
-
-    var newR = r >= contrastLine ? (r + trckVal / 5) : (r - trckVal / 5);
-    var newG = g >= contrastLine ? (g + trckVal / 5) : (g - trckVal / 5);
-    var newB = b >= contrastLine ? (b + trckVal / 5) : (b - trckVal / 5);
-
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
-  }
-  ctx.putImageData(imageData, img.x, img.y);
+document.querySelector('#apply').addEventListener('click', function(){
+  if($("input[name=filter]:checked").val() == "negative")
+     negateImage();
+  else if($("input[name=filter]:checked").val() == "contrast")
+    adjustImageContrast();
+  else if($("input[name=filter]:checked").val() == "bnw")
+    desaturateImage();
+  else if($("input[name=filter]:checked").val() == "noise")
+    addNoise();
+  else if($("input[name=filter]:checked").val() == "tint")
+    addTint();
 });
-
-document.querySelector('#bnw').addEventListener('click', function(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  for(i=0;i<dataArr.length;i+=4){
-    var avg = 0;
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
-    var a = dataArr[i+3];
-
-    avg = (r+g+b)/3;
-    var newR = r + (avg - r) * (trckVal / 100);
-    var newG = g + (avg - g) * (trckVal / 100);
-    var newB = b + (avg - b) * (trckVal / 100);
-
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
+document.querySelector('#undo').addEventListener('click', function(){
+  if(imageDataArray.length > 1){
+    console.info("undo");
+    imageDataArray.pop();
+    ctx.putImageData(imageDataArray[imageDataArray.length-1], img.x, img.y);
   }
-  ctx.putImageData(imageData, img.x, img.y);
 });
-
-document.querySelector('#noise').addEventListener('click', function(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  var trckVal_rand = Math.floor(Math.random() * 100);//temp;
-  for(i=0;i<dataArr.length;i+=4){
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
-    var a = dataArr[i+3];
-
-    var newR = r + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
-    var newG = g + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
-    var newB = b + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
-
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
+document.querySelector('#revert').addEventListener('click', function(){
+  if(imageDataArray.length > 1){
+    console.info("revert");
+    origImageData = imageDataArray[0];
+    imageDataArray = [origImageData];
+    ctx.putImageData(origImageData, img.x, img.y);
   }
-  ctx.putImageData(imageData, img.x, img.y);
 });
 
 document.querySelector("#download").addEventListener("click", function(){
