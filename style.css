@@ -1,0 +1,26 @@
+#filters{
+  width: 300px;
+  border: solid 1px #ccc;
+  padding: 10px;
+}
+
+#tintSliderDiv{
+  width: 55%;
+}
+.sliderValue{
+  display: block;
+  margin: 10px 0px 0px 65px;
+  text-align: center;
+}
+
+.btn{
+  border-radius: 10px;
+  border: solid 2px white;
+  padding: 10px;
+  background-color: #1f67db;
+  color: white;
+}
+.btn:hover{
+  border: solid 2px #69d3ff;
+  background-color: #146eff;
+}
