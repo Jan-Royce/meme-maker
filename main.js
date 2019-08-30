@@ -58,9 +58,11 @@ document.querySelectorAll('.rbtn').forEach(function(el,i){
     }
   });
 });
+
 document.querySelector('#slider').addEventListener('input', function(){
   trckVal = parseInt(this.value);
   $('#sliderVal').val(trckVal);
+
 });
 document.querySelector('#tintSlider').addEventListener('input', function(){
   tintTrckVal  = parseInt(this.value);
@@ -70,17 +72,9 @@ document.querySelector('#tintSlider').addEventListener('input', function(){
 });
 
 document.querySelector('#apply').addEventListener('click', function(){
-  if($("input[name=filter]:checked").val() == "negative")
-     negateImage();
-  else if($("input[name=filter]:checked").val() == "contrast")
-    adjustImageContrast();
-  else if($("input[name=filter]:checked").val() == "bnw")
-    desaturateImage();
-  else if($("input[name=filter]:checked").val() == "noise")
-    addNoise();
-  else if($("input[name=filter]:checked").val() == "tint")
-    addTint();
+    applyFilter($("input[name=filter]:checked").val());
 });
+
 document.querySelector('#undo').addEventListener('click', function(){
   if(imageDataArray.length > 1){
     console.info("undo");
@@ -88,6 +82,7 @@ document.querySelector('#undo').addEventListener('click', function(){
     ctx.putImageData(imageDataArray[imageDataArray.length-1], img.x, img.y);
   }
 });
+
 document.querySelector('#revert').addEventListener('click', function(){
   if(imageDataArray.length > 1){
     console.info("revert");
@@ -107,12 +102,11 @@ function downloadImage(){
   let lowQuality = canvas.toDataURL('image/jpeg', 0.1);
 
   image_name = Date.now();
-  // image_name = "test";
-  let x = new XMLHttpRequest();
-  x.open("GET", fullQuality, true);
-  x.responseType = 'blob';
-  x.onload = function(e){download(x.response, image_name + ".jpg", "image/jpeg" );}
-  x.send();
+  let downloadReq = new XMLHttpRequest();
+  downloadReq.open("GET", fullQuality, true);
+  downloadReq.responseType = 'blob';
+  downloadReq.onload = function(e){download(downloadReq.response, image_name + ".jpg", "image/jpeg" );}
+  downloadReq.send();
 }
 
 function getRandomIntInclusive(min, max) { //tnx mdn

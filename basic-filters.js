@@ -1,101 +1,88 @@
-function negateImage(){
+function applyFilter(filter){
   var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
   var dataArr = imageData.data;
-  for(i=0;i<dataArr.length;i+=4){
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
+  const { length } = dataArr;
 
-    var newR = 255 - r;
-    var newG = 255 - g;
-    var newB = 255 - b;
+  const changePixel = filter === "negative" ? (color) => negatePixel(color) :
+                   filter === "bnw" ? (color) => desaturatePixel(color) :
+                   filter === "contrast" ? (color) => adjustPixelContrast(color) :
+                   filter === "noise" ? (color) => addNoise(color):
+                   filter === "tint" ? (color) => addTint(color) :
+                   null;
 
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
+  for(let i = 0; i < length; i+= 4){
+    let newColor= changePixel({
+        r: dataArr[i],
+        g: dataArr[i + 1],
+        b: dataArr[i + 2],
+    })
+
+    dataArr[i] = clampRange(newColor.r);
+    dataArr[i+1] = clampRange(newColor.g);
+    dataArr[i+2] = clampRange(newColor.b);
   }
+
   ctx.putImageData(imageData, img.x, img.y);
   imageDataArray.push(imageData);
 }
 
-function adjustImageContrast(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  const contrastLine = 128;
-  for(i=0;i<dataArr.length;i+=4){
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
 
-    var newR = r >= contrastLine ? (r + trckVal / 5) : (r - trckVal / 5);
-    var newG = g >= contrastLine ? (g + trckVal / 5) : (g - trckVal / 5);
-    var newB = b >= contrastLine ? (b + trckVal / 5) : (b - trckVal / 5);
 
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
-  }
-  ctx.putImageData(imageData, img.x, img.y);
-  imageDataArray.push(imageData);
+function negatePixel(oldColor){
+    return {
+            r : 255 - oldColor.r,
+            g : 255 - oldColor.g,
+            b : 255 - oldColor.b
+          }
 }
 
-function desaturateImage(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  for(i=0;i<dataArr.length;i+=4){
-    var avg = 0;
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
 
-    avg = (r+g+b)/3;
-    var newR = r + (avg - r) * (trckVal / 100);
-    var newG = g + (avg - g) * (trckVal / 100);
-    var newB = b + (avg - b) * (trckVal / 100);
 
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
+function adjustPixelContrast(oldColor, contrastLine = 128){
+  var newR = oldColor.r >= contrastLine ? (oldColor.r + trckVal / 5) : (oldColor.r - trckVal / 5);
+  var newG = oldColor.g >= contrastLine ? (oldColor.g + trckVal / 5) : (oldColor.g - trckVal / 5);
+  var newB = oldColor.b >= contrastLine ? (oldColor.b + trckVal / 5) : (oldColor.b - trckVal / 5);
+
+  return{
+    r: newR,
+    g: newG,
+    b: newB
   }
-  ctx.putImageData(imageData, img.x, img.y);
-  imageDataArray.push(imageData);
 }
 
-function addNoise(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  var trckVal_rand = Math.floor(Math.random() * 100);//temp;
-  for(i=0;i<dataArr.length;i+=4){
-    var r = dataArr[i];
-    var g = dataArr[i+1];
-    var b = dataArr[i+2];
 
-    var newR = r + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
-    var newG = g + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
-    var newB = b + getRandomIntInclusive(trckVal_rand*-1, trckVal_rand);
 
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
-    dataArr[i+2] = clampRange(newB);
-  }
-  ctx.putImageData(imageData, img.x, img.y);
-  imageDataArray.push(imageData);
+function desaturatePixel(oldColor){
+    let avg = (oldColor.r + oldColor.g + oldColor.b)/3;
+    return {
+      r: oldColor.r + (avg - oldColor.r) * (trckVal / 100),
+      g: oldColor.g + (avg - oldColor.g) * (trckVal / 100),
+      b: oldColor.b + (avg - oldColor.b) * (trckVal / 100)
+    }
 }
 
-function addTint(){
-  var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
-  var dataArr = imageData.data;
-  var trckVal_rand = Math.floor(Math.random() * 100);//temp;
-  for(i=0;i<dataArr.length;i+=4){
-    var r = dataArr[i];
-    var g = dataArr[i+1];
 
-    var newR = tintTrckVal < 51 ? r + tintVal : r;
-    var newG = tintTrckVal > 51 ? g + tintVal : g;
 
-    dataArr[i] = clampRange(newR);
-    dataArr[i+1] = clampRange(newG);
+function addNoise(oldColor){
+    return {
+      r: oldColor.r + getRandomIntInclusive(trckVal*-1, trckVal),
+      g: oldColor.g + getRandomIntInclusive(trckVal*-1, trckVal),
+      b: oldColor.b + getRandomIntInclusive(trckVal*-1, trckVal)
+    }
+}
+
+
+
+function addTint(oldColor){
+  return{
+    r : tintTrckVal < 51 ? oldColor.r + tintVal : oldColor.r,
+    g : tintTrckVal > 51 ? oldColor.g + tintVal : oldColor.g,
+    b : oldColor.b
   }
-  ctx.putImageData(imageData, img.x, img.y);
-  imageDataArray.push(imageData);
+}
+
+
+function addSepia(oldColor){
+  let tempColor = desaturatePixel(oldColor)
+
 }
