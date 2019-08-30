@@ -19,8 +19,13 @@
   padding: 10px;
   background-color: #1f67db;
   color: white;
+  transition: 1s;
 }
-.btn:hover{
+.btn:hover:enabled{
   border: solid 2px #69d3ff;
   background-color: #146eff;
+}
+.btn:disabled{
+  color: #eee;
+  background-color: #aaa;
 }
