@@ -8,6 +8,7 @@ function applyFilter(filter){
                    filter === "contrast" ? (color) => adjustPixelContrast(color) :
                    filter === "noise" ? (color) => addNoise(color):
                    filter === "tint" ? (color) => addTint(color) :
+                   filter === "edgeDetection" ? (color) => detectEdges(color) :
                    null;
 
   for(let i = 0; i < length; i+= 4){
@@ -15,6 +16,12 @@ function applyFilter(filter){
         r: dataArr[i],
         g: dataArr[i + 1],
         b: dataArr[i + 2],
+        r_left: dataArr[i - 4],
+        g_left: dataArr[i - 3],
+        b_left: dataArr[i - 2],
+        r_bot: dataArr[i + (img.width * 4)],
+        g_bot: dataArr[i + (img.width * 4) + 1],
+        b_bot: dataArr[i + (img.width * 4) + 2]
     })
 
     dataArr[i] = clampRange(newColor.r);
@@ -59,6 +66,31 @@ function desaturatePixel(oldColor){
       g: oldColor.g + (avg - oldColor.g) * (trckVal / 100),
       b: oldColor.b + (avg - oldColor.b) * (trckVal / 100)
     }
+}
+
+function detectEdges(oldColor){
+    let avg = (oldColor.r + oldColor.g + oldColor.b)/3;
+    let avg_left = (oldColor.r_left + oldColor.g_left + oldColor.b_left)/3;
+    let avg_bot = (oldColor.r_bot + oldColor.g_bot + oldColor.b_bot)/3;
+
+    let new_pixel = {
+      r: oldColor.r,
+      g: oldColor.g,
+      b: oldColor.b
+    };
+    if(Math.abs(avg - avg_left) <= trckVal || Math.abs(avg - avg_bot) <= trckVal){
+      new_pixel = {
+        r: 255,
+        g: 255,
+        b: 255
+      };
+    }
+    // return {
+    //   r: avg > 100 ? oldColor.r + (avg - oldColor.r) * (trckVal / 100) : 255,
+    //   g: avg > 100 ? oldColor.g + (avg - oldColor.g) * (trckVal / 100) : 255,
+    //   b: avg > 100 ? oldColor.b + (avg - oldColor.b) * (trckVal / 100) : 255
+    // }
+    return new_pixel;
 }
 
 

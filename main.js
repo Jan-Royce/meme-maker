@@ -52,6 +52,10 @@ document.querySelectorAll('.rbtn').forEach(function(el,i){
       $('#tintSliderDiv').css('display','block');
       $('#sliderDiv').css('display','none');
     }
+    else if(this.value == "negative"){
+      $('#tintSliderDiv').css('display','none');
+      $('#sliderDiv').css('display','none');
+    }
     else{
       $('#sliderVal').val(50);
       $('#slider').val(50);
