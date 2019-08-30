@@ -5,6 +5,7 @@ var trckVal = 50;
 var tintTrckVal = 50;
 var tintVal = 0;
 var imageDataArray = [];
+var filters = [];
 
 document.querySelector('#fileSelect').addEventListener('change', function(){
   if(this.files.length > 0){
@@ -43,6 +44,7 @@ document.querySelector('#fileSelect').addEventListener('change', function(){
 });
 
 document.querySelectorAll('.rbtn').forEach(function(el,i){
+  filters.push(el.value);
   el.addEventListener('change',function(){
     if(this.value == "tint"){
       $('#tintSliderVal').val(0);
