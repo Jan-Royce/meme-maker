@@ -1,6 +1,10 @@
 function applyFilter(filter){
   var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
+  var imageDataHidden = ctx2.getImageData(img.x,img.y,img.width,img.height);
+
   var dataArr = imageData.data;
+  var dataArrHidden = imageDataHidden.data;
+
   const { length } = dataArr;
 
   const changePixel = filter === "negative" ? (color) => negatePixel(color) :
@@ -13,15 +17,15 @@ function applyFilter(filter){
 
   for(let i = 0; i < length; i+= 4){
     let newColor= changePixel({
-        r: dataArr[i],
-        g: dataArr[i + 1],
-        b: dataArr[i + 2],
-        r_left: dataArr[i - 4],
-        g_left: dataArr[i - 3],
-        b_left: dataArr[i - 2],
-        r_bot: dataArr[i + (img.width * 4)],
-        g_bot: dataArr[i + (img.width * 4) + 1],
-        b_bot: dataArr[i + (img.width * 4) + 2]
+        r: dataArrHidden[i],
+        g: dataArrHidden[i + 1],
+        b: dataArrHidden[i + 2],
+        r_left: dataArrHidden[i - 4],
+        g_left: dataArrHidden[i - 3],
+        b_left: dataArrHidden[i - 2],
+        r_bot: dataArrHidden[i + (img.width * 4)],
+        g_bot: dataArrHidden[i + (img.width * 4) + 1],
+        b_bot: dataArrHidden[i + (img.width * 4) + 2]
     })
 
     dataArr[i] = clampRange(newColor.r);
@@ -67,32 +71,6 @@ function desaturatePixel(oldColor){
       b: oldColor.b + (avg - oldColor.b) * (trckVal / 100)
     }
 }
-
-function detectEdges(oldColor){
-    let avg = (oldColor.r + oldColor.g + oldColor.b)/3;
-    let avg_left = (oldColor.r_left + oldColor.g_left + oldColor.b_left)/3;
-    let avg_bot = (oldColor.r_bot + oldColor.g_bot + oldColor.b_bot)/3;
-
-    let new_pixel = {
-      r: oldColor.r,
-      g: oldColor.g,
-      b: oldColor.b
-    };
-    if(Math.abs(avg - avg_left) <= trckVal || Math.abs(avg - avg_bot) <= trckVal){
-      new_pixel = {
-        r: 255,
-        g: 255,
-        b: 255
-      };
-    }
-    // return {
-    //   r: avg > 100 ? oldColor.r + (avg - oldColor.r) * (trckVal / 100) : 255,
-    //   g: avg > 100 ? oldColor.g + (avg - oldColor.g) * (trckVal / 100) : 255,
-    //   b: avg > 100 ? oldColor.b + (avg - oldColor.b) * (trckVal / 100) : 255
-    // }
-    return new_pixel;
-}
-
 
 
 function addNoise(oldColor){

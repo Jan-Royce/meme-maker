@@ -1,5 +1,8 @@
-var canvas = document.getElementById('image');
+var canvas = document.getElementById('outputImage');
 var ctx = canvas.getContext('2d');
+var canvas2 = document.getElementById('hiddenImage');
+var ctx2 = canvas2.getContext('2d');
+
 var img = new Image();
 var trckVal = 50;
 var tintTrckVal = 50;
@@ -15,6 +18,9 @@ document.querySelector('#fileSelect').addEventListener('change', function(){
           canvas.width = img.width;
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0, img.width, img.height);
+          canvas2.width = img.width;
+          canvas2.height = img.height;
+          ctx2.drawImage(img, 0, 0, img.width, img.height);
           let imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
           imageDataArray.push(imageData);
         };
