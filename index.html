@@ -7,39 +7,49 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <input type="file" id="fileSelect" accept="image/*">
-    <div class="wrapper">
-      <canvas id="image" width="100" height="100"></canvas>
-    </div>
-    <div id="filters">
-      <input type="radio" name="filter" class="rbtn" value="contrast" disabled>Contrast
-      <input type="radio" name="filter" class="rbtn" value="bnw" disabled>Black & White
-      <input type="radio" name="filter" class="rbtn" value="negative" disabled>Negative
-      <input type="radio" name="filter" class="rbtn" value="noise" disabled>Noise
-      <input type="radio" name="filter" class="rbtn" value="tint" disabled>Tint
-      <input type="radio" name="filter" class="rbtn" value="edgeDetection" disabled>Edge Detection
-      <div id="sliderDiv">
-        <input id="sliderVal" class="sliderValue" value="50" size="1" readonly>
-        <input type="range" id="slider" max="100" value="50" disabled>
-      </div>
-      <div id="tintSliderDiv" style="display:none">
-        <input id="tintSliderVal" class="sliderValue" value="0" size="1" readonly>
-        R<span style="float:right;">G</span>
-        <div>
-          <input type="range" id="tintSlider" max="101" value="51">
+    <div id="container">
+      <div id="leftDiv">
+        <input type="file" id="fileSelect" accept="image/*">
+        <div id="canvasDiv">
+          <canvas id="outputImage" width="100" height="100"></canvas>
+          <canvas id="hiddenImage" width="100" height="100" style="display:block;"></canvas>
         </div>
       </div>
-      <button id="apply" class="btn" disabled>Apply</button>
-      <button id="undo" class="btn" disabled>Undo</button>
-      <button id="revert" class="btn" disabled>Revert to Original</button>
+      <div id="rightDiv">
+        <div id="filters">
+          <input type="radio" name="filter" class="rbtn" value="contrast" disabled>Contrast
+          <input type="radio" name="filter" class="rbtn" value="bnw" disabled>Black & White
+          <input type="radio" name="filter" class="rbtn" value="negative" disabled>Negative
+          <input type="radio" name="filter" class="rbtn" value="noise" disabled>Noise
+          <input type="radio" name="filter" class="rbtn" value="tint" disabled>Tint
+          <input type="radio" name="filter" class="rbtn" value="edgeDetection" disabled>Edge Detection
+          <div id="sliderDiv">
+            <input id="sliderVal" class="sliderValue" value="50" size="1" readonly>
+            <input type="range" id="slider" max="100" value="50" disabled>
+          </div>
+          <div id="tintSliderDiv" style="display:none">
+            <input id="tintSliderVal" class="sliderValue" value="0" size="1" readonly>
+            R<span style="float:right;">G</span>
+            <div>
+              <input type="range" id="tintSlider" max="101" value="51">
+            </div>
+          </div>
+          <div id="buttonsDiv">
+            <button id="apply" class="btn" disabled>Apply</button>
+            <button id="undo" class="btn" disabled>Undo</button>
+            <button id="revert" class="btn" disabled>Revert to Original</button>
+          </div>
+        </div>
+
+        <br><br>
+        <button id="download" class="btn" disabled>Download</button>
+      </div>
     </div>
 
-    <br><br>
-    <button id="download" class="btn" disabled>Download</button>
-    <!-- <button id="download" style="display:none">Download</button> -->
   </body>
   <script type="text/javascript" src="jquery-3.4.1.min.js"></script>
   <script type="text/javascript" src="download.js"></script>
+  <script type="text/javascript" src="complex-filters.js"></script>
   <script type="text/javascript" src="basic-filters.js"></script>
   <script type="text/javascript" src="main.js"></script>
 </html>
