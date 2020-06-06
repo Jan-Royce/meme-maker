@@ -9,6 +9,7 @@ var tintTrckVal = 50;
 var tintVal = 0;
 var imageDataArray = [];
 var filters = [];
+//test
 
 document.querySelector('#fileSelect').addEventListener('change', function(){
   if(this.files.length > 0){
