@@ -1,4 +1,3 @@
-//basic filters
 function applyFilter(filter){
   var imageData = ctx.getImageData(img.x,img.y,img.width,img.height);
   var imageDataHidden = ctx2.getImageData(img.x,img.y,img.width,img.height);
